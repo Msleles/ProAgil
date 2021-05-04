@@ -18,6 +18,6 @@ namespace ProAgil.Domain
         public List<Lote> Lote { get; set; }
         public List<RedeSocial> RedesSociais { get; set; }
         public List<PalestranteEvento> PalestranteEventos { get; set; }
-
+        
     }
 }
