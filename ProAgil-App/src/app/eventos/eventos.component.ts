@@ -2,7 +2,10 @@ import { Component, OnInit, TemplateRef } from '@angular/core';
 import { Evento } from '../_models/Evento';
 import { EventoService } from '../_services/evento.service';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
-import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import { defineLocale , ptBrLocale } from 'ngx-bootstrap/chronos';
+import { BsLocaleService } from 'ngx-bootstrap/datepicker';
+defineLocale('pt-br', ptBrLocale);
 
 
 
@@ -21,13 +24,22 @@ export class EventosComponent implements OnInit {
   mostrarImagem = false;
   modalRef: BsModalRef | any ;
   registerForm: FormGroup | any;
+  file: File | any;
+  fileNameToUpdate: string | any;
 
 
 
   // tslint:disable-next-line:variable-name
   _filtroLista = '';
 
-  constructor(private eventoService: EventoService, private modalService: BsModalService ) { }
+  constructor(
+    private eventoService: EventoService,
+    private modalService: BsModalService ,  private fb: FormBuilder , private localeService: BsLocaleService
+    ) {
+      this.localeService.use('pt-br');
+    }
+
+
 
 
   get filtroLista(): string {
@@ -60,15 +72,25 @@ export class EventosComponent implements OnInit {
   }
 
   validation(){
-    this.registerForm = new FormGroup({
-      tema: new FormControl('',
-      [Validators.required, Validators.minLength(4), Validators.maxLength(50)]),
-      local: new FormControl('', Validators.required),
-      dataEvento: new FormControl('', Validators.required),
-      ImagemURL : new FormControl('', Validators.required),
-      qtdPessoas: new FormControl('', [Validators.required , Validators.max(1200000)]),
-      email: new FormControl('', [Validators.required, Validators.email])
+    this.registerForm = this.fb.group({
+      tema: ['',
+      [Validators.required, Validators.minLength(4), Validators.maxLength(50)]],
+      local: ['', Validators.required],
+      dataEvento: ['', Validators.required],
+      ImagemURL : ['', Validators.required],
+      qtdPessoas: ['', [Validators.required , Validators.max(1200000)]],
+      telefone : ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]]
     });
+  }
+
+  onFileChange(event) {
+    const reader = new FileReader();
+
+    if (event.target.files && event.target.files.length) {
+      this.file = event.target.files;
+      console.log(this.file);
+    }
   }
 
   salvarAlteracao(){
