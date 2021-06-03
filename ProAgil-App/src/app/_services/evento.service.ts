@@ -21,4 +21,8 @@ getEventoById(Id: number): Observable<Evento[]> {
   return this.http.get<Evento[]>(`${this.baseURL}/${Id}`);
 }
 
+postEvento(evento: Evento){
+  return this.http.post(this.baseURL, evento);
+}
+
 }

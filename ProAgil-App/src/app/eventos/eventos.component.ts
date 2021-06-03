@@ -1,7 +1,7 @@
 import { Component, OnInit, TemplateRef } from '@angular/core';
 import { Evento } from '../_models/Evento';
 import { EventoService } from '../_services/evento.service';
-import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
+import { BsModalService } from 'ngx-bootstrap/modal';
 import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import { defineLocale , ptBrLocale } from 'ngx-bootstrap/chronos';
 import { BsLocaleService } from 'ngx-bootstrap/datepicker';
@@ -18,11 +18,12 @@ defineLocale('pt-br', ptBrLocale);
 export class EventosComponent implements OnInit {
 
   eventosFiltrados: Evento[] = [];
-  eventos: Evento[] = [];
+
+  evento: Evento | any ;
+
   imagemLargura = 50;
   imagemMargem = 2;
   mostrarImagem = false;
-  modalRef: BsModalRef | any ;
   registerForm: FormGroup | any;
   file: File | any;
   fileNameToUpdate: string | any;
@@ -47,11 +48,12 @@ export class EventosComponent implements OnInit {
   }
   set filtroLista(value: string) {
     this._filtroLista = value;
-    this.eventosFiltrados = this.filtroLista ? this.filtrarEventos(this.filtroLista) : this.eventos;
+    this.eventosFiltrados = this.filtroLista ? this.filtrarEventos(this.filtroLista) : this.evento;
   }
 
-  openModal(template: TemplateRef<any>){
-    this.modalRef = this.modalService.show(template);
+  openModal(template: any){
+    this.registerForm.reset();
+    template.show();
   }
 
 
@@ -62,7 +64,7 @@ export class EventosComponent implements OnInit {
 
   filtrarEventos(filtrarPor: string): Evento[] {
     filtrarPor = filtrarPor.toLocaleLowerCase();
-    return this.eventos.filter(
+    return this.evento.filter(
       evento => evento.tema.toLocaleLowerCase().indexOf(filtrarPor) !== -1
     );
   }
@@ -93,14 +95,25 @@ export class EventosComponent implements OnInit {
     }
   }
 
-  salvarAlteracao(){
-
+  salvarAlteracao(template: any){
+    if (this.registerForm.valid) {
+      this.evento = Object.assign({}, this.registerForm.value);
+      this.eventoService.postEvento(this.evento).subscribe(
+        (novoEvento: Evento | any) => {
+          console.log(novoEvento);
+          template.hide();
+          this.getEventos();
+        }, error => {
+          console.log(error);
+        }
+      );
+    }
   }
 
   getEventos() {
     this.eventoService.getAllEvento().subscribe(
       (eventos: Evento[]) => {
-      this.eventos = eventos;
+      this.evento = eventos;
       console.log(eventos);
     }, error => {
       console.log(error);
